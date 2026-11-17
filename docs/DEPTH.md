@@ -13,6 +13,11 @@
 | M5 复检裁决 | 执行并复核复检裁决 | `POST /api/retest` | `app/modules/retest/rules.py` | `tests/test_retest.py` |
 | M6 锁库检查 | 执行并复核锁库检查 | `POST /api/locking` | `app/modules/locking/rules.py` | `tests/test_locking.py` |
 | M7 冻结归档 | 执行并复核冻结归档 | `POST /api/archive` | `app/modules/archive/rules.py` | `tests/test_archive.py` |
+| M8 方案更正 | 更正重锁与放行 | `POST /api/amendments`、`POST /api/amendments/{id}/promote` | `app/modules/amendment/rules.py` | `tests/test_amendment.py` |
+
+## 方案更正重锁规则
+
+更正只允许新增方案版本号，不得改写已生效版本（防止全量追溯否定旧版窗内结论）。按受试者生效时刻截接生效窗：生效前维持旧版结论，生效后按新版重判。决议按基批+更正内容+规则版本生成摘要，同一更正重试幂等不重复。逐受试者×访视对比基批与候选批，处置分维持、重判、新增偏离三类，每行可溯适用方案、窗口、复检结论与来源批次。复检仍不能填补漏访。放行前重算核对：候选批与基批同源、按更正重算摘要一致、差异与决议一致、闸门（行守恒、无未处理影响、影响全部处置、来源可追溯）全过，才切换正式锁库；任一失败回滚，旧版保留。基批已非当前锁库时拒绝放行。
 
 ## 陷阱登记
 

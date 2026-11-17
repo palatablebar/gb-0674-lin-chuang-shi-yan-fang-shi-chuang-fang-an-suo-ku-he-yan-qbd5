@@ -48,5 +48,13 @@ def review(run_id:str,payload:dict=Body(...)):
 def export(run_id:str):
     result=store.get(DB_PATH,run_id)
     return Response(serialize(result),media_type='application/zip',headers={'Content-Disposition':f'attachment; filename="{run_id}.zip"'})
+@app.post('/api/runs/{run_id}/lock')
+def initial_lock(run_id:str):
+    result=store.get(DB_PATH,run_id)
+    if result['balance']['status']!='可锁库': raise BusinessError('LOCK_BLOCKED','批次存在阻断项，不能锁库')
+    lock,created=store.lock_initial(DB_PATH,run_id)
+    return {'formal_lock':lock,'created':created}
 for key in MODULES:
     app.include_router(import_module(f'app.modules.{key}.handler').router)
+from app.modules.amendment import handler as amendment
+app.include_router(amendment.router)
